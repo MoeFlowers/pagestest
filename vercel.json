@@ -1,14 +1,24 @@
 {
   "version": 2,
-  "outputDirectory": ".",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/ventas",
-      "destination": "/ventas.html"
+      "src": "**/*.html",
+      "use": "@vercel/static",
+      "config": { "distDir": "." }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/ventas",
+      "dest": "/ventas.html"
     },
     {
-      "source": "/reporte-mensual",
-      "destination": "/reporte-mensual.html"
+      "src": "/reporte-mensual",
+      "dest": "/reporte-mensual.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
