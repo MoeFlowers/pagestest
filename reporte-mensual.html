@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Financiero Mensual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8fafc;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card h3 {
+            color: #4a5568;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .summary-card .subtitle {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        th {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        tr:hover {
+            background-color: #f7fafc;
+            transition: background-color 0.2s ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ingresos {
+            color: #48bb78;
+            font-weight: 600;
+        }
+
+        .gastos {
+            color: #f56565;
+            font-weight: 600;
+        }
+
+        .ganancia {
+            color: #4299e1;
+            font-weight: 700;
+        }
+
+        .margen-positive {
+            background-color: #c6f6d5;
+            color: #22543d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .margen-negative {
+            background-color: #fed7d7;
+            color: #742a2a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            padding: 30px;
+            background: #f8fafc;
+        }
+
+        .chart-title {
+            text-align: center;
+            color: #4a5568;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 300px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .bar {
+            flex: 1;
+            margin: 0 5px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            transition: opacity 0.2s ease;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: #4a5568;
+            white-space: nowrap;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .summary-cards {
+                padding: 15px;
+            }
+            
+            .table-container {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+            
+            .bar-chart {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 Reporte Financiero Mensual</h1>
+            <p>Análisis agregado del desempeño anual 2026</p>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>Ingresos Totales</h3>
+                <div class="value" id="total-ingresos">$0</div>
+                <div class="subtitle">Anual 2026</div>
+            </div>
+            <div class="summary-card">
+                <h3>Gastos Operativos</h3>
+                <div class="value" id="total-gastos">$0</div>
+                <div class="subtitle">Anual 2026</div>
+            </div>
+            <div class="summary-card">
+                <h3>Ganancia Neta</h3>
+                <div class="value" id="total-ganancia">$0</div>
+                <div class="subtitle">Anual 2026</div>
+            </div>
+            <div class="summary-card">
+                <h3>Margen Promedio</h3>
+                <div class="value" id="margen-promedio">0%</div>
+                <div class="subtitle">Anual 2026</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Evolución Mensual de Ingresos</h2>
+            <div class="bar-chart" id="ingresos-chart"></div>
+        </div>
+
+        <div class="table-container">
+            <table id="reporte-table">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Ingresos_Totales</th>
+                        <th>Gastos_Operativos</th>
+                        <th>Ganancia_Neta</th>
+                        <th>Margen_Porcentaje</th>
+                        <th>Transacciones_Realizadas</th>
+                        <th>Ticket_Promedio</th>
+                        <th>Mejor_Vendedor_del_Mes</th>
+                        <th>Categoria_Top</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Enero 2026</td>
+                        <td class="ingresos">$45,680.00</td>
+                        <td class="gastos">$28,420.00</td>
+                        <td class="ganancia">$17,260.00</td>
+                        <td><span class="margen-positive">37.8%</span></td>
+                        <td>156</td>
+                        <td>$292.82</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Laptops</td>
+                    </tr>
+                    <tr>
+                        <td>Febrero 2026</td>
+                        <td class="ingresos">$52,340.00</td>
+                        <td class="gastos">$31,890.00</td>
+                        <td class="ganancia">$20,450.00</td>
+                        <td><span class="margen-positive">39.1%</span></td>
+                        <td>178</td>
+                        <td>$294.05</td>
+                        <td>María González</td>
+                        <td>Monitores</td>
+                    </tr>
+                    <tr>
+                        <td>Marzo 2026</td>
+                        <td class="ingresos">$48,920.00</td>
+                        <td class="gastos">$32,150.00</td>
+                        <td class="ganancia">$16,770.00</td>
+                        <td><span class="margen-positive">34.3%</span></td>
+                        <td>165</td>
+                        <td>$296.48</td>
+                        <td>Luis Fernández</td>
+                        <td>Accesorios</td>
+                    </tr>
+                    <tr>
+                        <td>Abril 2026</td>
+                        <td class="ingresos">$58,760.00</td>
+                        <td class="gastos">$35,420.00</td>
+                        <td class="ganancia">$23,340.00</td>
+                        <td><span class="margen-positive">39.7%</span></td>
+                        <td>198</td>
+                        <td>$296.77</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Laptops</td>
+                    </tr>
+                    <tr>
+                        <td>Mayo 2026</td>
+                        <td class="ingresos">$61,230.00</td>
+                        <td class="gastos">$37,890.00</td>
+                        <td class="ganancia">$23,340.00</td>
+                        <td><span class="margen-positive">38.1%</span></td>
+                        <td>205</td>
+                        <td>$298.68</td>
+                        <td>María González</td>
+                        <td>Impresoras</td>
+                    </tr>
+                    <tr>
+                        <td>Junio 2026</td>
+                        <td class="ingresos">$55,890.00</td>
+                        <td class="gastos">$34,670.00</td>
+                        <td class="ganancia">$21,220.00</td>
+                        <td><span class="margen-positive">38.0%</span></td>
+                        <td>189</td>
+                        <td>$295.71</td>
+                        <td>Luis Fernández</td>
+                        <td>Monitores</td>
+                    </tr>
+                    <tr>
+                        <td>Julio 2026</td>
+                        <td class="ingresos">$63,450.00</td>
+                        <td class="gastos">$38,920.00</td>
+                        <td class="ganancia">$24,530.00</td>
+                        <td><span class="margen-positive">38.7%</span></td>
+                        <td>212</td>
+                        <td>$299.29</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Laptops</td>
+                    </tr>
+                    <tr>
+                        <td>Agosto 2026</td>
+                        <td class="ingresos">$59,320.00</td>
+                        <td class="gastos">$36,780.00</td>
+                        <td class="ganancia">$22,540.00</td>
+                        <td><span class="margen-positive">38.0%</span></td>
+                        <td>201</td>
+                        <td>$295.12</td>
+                        <td>María González</td>
+                        <td>Webcams</td>
+                    </tr>
+                    <tr>
+                        <td>Septiembre 2026</td>
+                        <td class="ingresos">$57,890.00</td>
+                        <td class="gastos">$35,450.00</td>
+                        <td class="ganancia">$22,440.00</td>
+                        <td><span class="margen-positive">38.8%</span></td>
+                        <td>196</td>
+                        <td>$295.36</td>
+                        <td>Luis Fernández</td>
+                        <td>Accesorios</td>
+                    </tr>
+                    <tr>
+                        <td>Octubre 2026</td>
+                        <td class="ingresos">$62,340.00</td>
+                        <td class="gastos">$37,890.00</td>
+                        <td class="ganancia">$24,450.00</td>
+                        <td><span class="margen-positive">39.2%</span></td>
+                        <td>208</td>
+                        <td>$299.71</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Laptops</td>
+                    </tr>
+                    <tr>
+                        <td>Noviembre 2026</td>
+                        <td class="ingresos">$64,780.00</td>
+                        <td class="gastos">$39,420.00</td>
+                        <td class="ganancia">$25,360.00</td>
+                        <td><span class="margen-positive">39.2%</span></td>
+                        <td>215</td>
+                        <td>$301.30</td>
+                        <td>María González</td>
+                        <td>Monitores</td>
+                    </tr>
+                    <tr>
+                        <td>Diciembre 2026</td>
+                        <td class="ingresos">$68,920.00</td>
+                        <td class="gastos">$41,340.00</td>
+                        <td class="ganancia">$27,580.00</td>
+                        <td><span class="margen-positive">40.0%</span></td>
+                        <td>228</td>
+                        <td>$302.28</td>
+                        <td>Luis Fernández</td>
+                        <td>Laptops</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Calcular estadísticas anuales
+        function calcularEstadisticasAnuales() {
+            const table = document.getElementById('reporte-table');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            let totalIngresos = 0;
+            let totalGastos = 0;
+            let totalTransacciones = 0;
+            let ingresosMensuales = [];
+            
+            for (let row of rows) {
+                const ingresos = parseFloat(row.cells[1].textContent.replace('$', '').replace(',', ''));
+                const gastos = parseFloat(row.cells[2].textContent.replace('$', '').replace(',', ''));
+                const transacciones = parseInt(row.cells[5].textContent);
+                
+                totalIngresos += ingresos;
+                totalGastos += gastos;
+                totalTransacciones += transacciones;
+                ingresosMensuales.push(ingresos);
+            }
+            
+            const totalGanancia = totalIngresos - totalGastos;
+            const margenPromedio = totalIngresos > 0 ? (totalGanancia / totalIngresos) * 100 : 0;
+            
+            // Actualizar tarjetas de resumen
+            document.getElementById('total-ingresos').textContent = `$${totalIngresos.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('total-gastos').textContent = `$${totalGastos.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('total-ganancia').textContent = `$${totalGanancia.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('margen-promedio').textContent = `${margenPromedio.toFixed(1)}%`;
+            
+            // Crear gráfico de barras
+            crearGraficoIngresos(ingresosMensuales);
+        }
+        
+        function crearGraficoIngresos(ingresos) {
+            const chartContainer = document.getElementById('ingresos-chart');
+            const maxIngreso = Math.max(...ingresos);
+            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            
+            chartContainer.innerHTML = '';
+            
+            ingresos.forEach((ingreso, index) => {
+                const barHeight = (ingreso / maxIngreso) * 250;
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${barHeight}px`;
+                
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = meses[index];
+                
+                const value = document.createElement('div');
+                value.className = 'bar-value';
+                value.textContent = `$${(ingreso/1000).toFixed(0)}k`;
+                
+                bar.appendChild(label);
+                bar.appendChild(value);
+                chartContainer.appendChild(bar);
+            });
+        }
+        
+        // Ejecutar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', calcularEstadisticasAnuales);
+    </script>
+</body>
+</html>

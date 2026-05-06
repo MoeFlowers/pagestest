@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transacciones de Ventas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        tr:hover {
+            background-color: #f7fafc;
+            transition: background-color 0.2s ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .estado-completada {
+            background-color: #48bb78;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .estado-pendiente {
+            background-color: #ed8936;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .estado-cancelada {
+            background-color: #f56565;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .monto-total {
+            font-weight: 600;
+            color: #2b6cb0;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f8fafc;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .table-container {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Transacciones de Ventas</h1>
+            <p>Registro detallado de todas las transacciones comerciales</p>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="total-transacciones">0</div>
+                <div class="stat-label">Total Transacciones</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-ingresos">$0</div>
+                <div class="stat-label">Ingresos Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="promedio-venta">$0</div>
+                <div class="stat-label">Promedio de Venta</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="top-vendedor">-</div>
+                <div class="stat-label">Mejor Vendedor</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="ventas-table">
+                <thead>
+                    <tr>
+                        <th>ID_Transaccion</th>
+                        <th>Fecha</th>
+                        <th>Vendedor</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio_Unitario</th>
+                        <th>Monto_Total</th>
+                        <th>Region</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>TXN-001</td>
+                        <td>01/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Laptop</td>
+                        <td>2</td>
+                        <td>$1,200.00</td>
+                        <td class="monto-total">$2,400.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-002</td>
+                        <td>02/01/2026</td>
+                        <td>María González</td>
+                        <td>Monitor</td>
+                        <td>3</td>
+                        <td>$350.00</td>
+                        <td class="monto-total">$1,050.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-003</td>
+                        <td>03/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Teclado</td>
+                        <td>5</td>
+                        <td>$85.00</td>
+                        <td class="monto-total">$425.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-004</td>
+                        <td>04/01/2026</td>
+                        <td>Ana Martínez</td>
+                        <td>Mouse</td>
+                        <td>8</td>
+                        <td>$45.00</td>
+                        <td class="monto-total">$360.00</td>
+                        <td>Barquisimeto</td>
+                        <td><span class="estado-pendiente">Pendiente</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-005</td>
+                        <td>05/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Laptop</td>
+                        <td>1</td>
+                        <td>$1,500.00</td>
+                        <td class="monto-total">$1,500.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-006</td>
+                        <td>06/01/2026</td>
+                        <td>María González</td>
+                        <td>Impresora</td>
+                        <td>2</td>
+                        <td>$280.00</td>
+                        <td class="monto-total">$560.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-007</td>
+                        <td>07/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Webcam</td>
+                        <td>4</td>
+                        <td>$120.00</td>
+                        <td class="monto-total">$480.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-cancelada">Cancelada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-008</td>
+                        <td>08/01/2026</td>
+                        <td>Ana Martínez</td>
+                        <td>Auriculares</td>
+                        <td>6</td>
+                        <td>$95.00</td>
+                        <td class="monto-total">$570.00</td>
+                        <td>Barquisimeto</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-009</td>
+                        <td>09/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Monitor</td>
+                        <td>2</td>
+                        <td>$400.00</td>
+                        <td class="monto-total">$800.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-010</td>
+                        <td>10/01/2026</td>
+                        <td>María González</td>
+                        <td>Teclado</td>
+                        <td>3</td>
+                        <td>$110.00</td>
+                        <td class="monto-total">$330.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-pendiente">Pendiente</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-011</td>
+                        <td>11/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Laptop</td>
+                        <td>1</td>
+                        <td>$1,800.00</td>
+                        <td class="monto-total">$1,800.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-012</td>
+                        <td>12/01/2026</td>
+                        <td>Ana Martínez</td>
+                        <td>Mouse</td>
+                        <td>10</td>
+                        <td>$55.00</td>
+                        <td class="monto-total">$550.00</td>
+                        <td>Barquisimeto</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-013</td>
+                        <td>13/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Impresora</td>
+                        <td>1</td>
+                        <td>$320.00</td>
+                        <td class="monto-total">$320.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-014</td>
+                        <td>14/01/2026</td>
+                        <td>María González</td>
+                        <td>Webcam</td>
+                        <td>3</td>
+                        <td>$150.00</td>
+                        <td class="monto-total">$450.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-015</td>
+                        <td>15/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Auriculares</td>
+                        <td>4</td>
+                        <td>$130.00</td>
+                        <td class="monto-total">$520.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-cancelada">Cancelada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-016</td>
+                        <td>16/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Teclado</td>
+                        <td>2</td>
+                        <td>$125.00</td>
+                        <td class="monto-total">$250.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-017</td>
+                        <td>17/01/2026</td>
+                        <td>María González</td>
+                        <td>Laptop</td>
+                        <td>3</td>
+                        <td>$1,350.00</td>
+                        <td class="monto-total">$4,050.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-018</td>
+                        <td>18/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Monitor</td>
+                        <td>1</td>
+                        <td>$450.00</td>
+                        <td class="monto-total">$450.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-pendiente">Pendiente</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-019</td>
+                        <td>19/01/2026</td>
+                        <td>Ana Martínez</td>
+                        <td>Mouse</td>
+                        <td>7</td>
+                        <td>$65.00</td>
+                        <td class="monto-total">$455.00</td>
+                        <td>Barquisimeto</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-020</td>
+                        <td>20/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Impresora</td>
+                        <td>2</td>
+                        <td>$290.00</td>
+                        <td class="monto-total">$580.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-021</td>
+                        <td>21/01/2026</td>
+                        <td>María González</td>
+                        <td>Webcam</td>
+                        <td>5</td>
+                        <td>$135.00</td>
+                        <td class="monto-total">$675.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-022</td>
+                        <td>22/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Auriculares</td>
+                        <td>3</td>
+                        <td>$145.00</td>
+                        <td class="monto-total">$435.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-023</td>
+                        <td>23/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Laptop</td>
+                        <td>1</td>
+                        <td>$2,100.00</td>
+                        <td class="monto-total">$2,100.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-024</td>
+                        <td>24/01/2026</td>
+                        <td>María González</td>
+                        <td>Teclado</td>
+                        <td>4</td>
+                        <td>$95.00</td>
+                        <td class="monto-total">$380.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-pendiente">Pendiente</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-025</td>
+                        <td>25/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Monitor</td>
+                        <td>2</td>
+                        <td>$380.00</td>
+                        <td class="monto-total">$760.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-026</td>
+                        <td>26/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Mouse</td>
+                        <td>6</td>
+                        <td>$75.00</td>
+                        <td class="monto-total">$450.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-027</td>
+                        <td>27/01/2026</td>
+                        <td>María González</td>
+                        <td>Impresora</td>
+                        <td>1</td>
+                        <td>$350.00</td>
+                        <td class="monto-total">$350.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-028</td>
+                        <td>28/01/2026</td>
+                        <td>Luis Fernández</td>
+                        <td>Webcam</td>
+                        <td>2</td>
+                        <td>$165.00</td>
+                        <td class="monto-total">$330.00</td>
+                        <td>Valencia</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-029</td>
+                        <td>29/01/2026</td>
+                        <td>Carlos Rodríguez</td>
+                        <td>Auriculares</td>
+                        <td>3</td>
+                        <td>$155.00</td>
+                        <td class="monto-total">$465.00</td>
+                        <td>Caracas</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                    <tr>
+                        <td>TXN-030</td>
+                        <td>30/01/2026</td>
+                        <td>María González</td>
+                        <td>Laptop</td>
+                        <td>2</td>
+                        <td>$1,750.00</td>
+                        <td class="monto-total">$3,500.00</td>
+                        <td>Maracaibo</td>
+                        <td><span class="estado-completada">Completada</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Calcular estadísticas
+        function calcularEstadisticas() {
+            const table = document.getElementById('ventas-table');
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            let totalTransacciones = 0;
+            let totalIngresos = 0;
+            let vendedorTotales = {};
+            
+            for (let row of rows) {
+                const estado = row.cells[8].textContent.trim();
+                if (estado.includes('Completada')) {
+                    totalTransacciones++;
+                    const monto = parseFloat(row.cells[6].textContent.replace('$', '').replace(',', ''));
+                    totalIngresos += monto;
+                    
+                    const vendedor = row.cells[2].textContent;
+                    vendedorTotales[vendedor] = (vendedorTotales[vendedor] || 0) + monto;
+                }
+            }
+            
+            const promedioVenta = totalTransacciones > 0 ? totalIngresos / totalTransacciones : 0;
+            
+            // Encontrar el mejor vendedor
+            let mejorVendedor = '-';
+            let maxVentas = 0;
+            for (let [vendedor, total] of Object.entries(vendedorTotales)) {
+                if (total > maxVentas) {
+                    maxVentas = total;
+                    mejorVendedor = vendedor;
+                }
+            }
+            
+            // Actualizar el DOM
+            document.getElementById('total-transacciones').textContent = totalTransacciones;
+            document.getElementById('total-ingresos').textContent = `$${totalIngresos.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('promedio-venta').textContent = `$${promedioVenta.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('top-vendedor').textContent = mejorVendedor;
+        }
+        
+        // Ejecutar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', calcularEstadisticas);
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "crw-pages-test",
+  "version": "1.0.0",
+  "description": "Páginas de reportes de ventas y finanzas",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'No build step required for static HTML'",
+    "start": "npx serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}
